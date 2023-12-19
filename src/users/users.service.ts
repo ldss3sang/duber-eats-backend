@@ -75,10 +75,10 @@ export class UsersSerivce {
   }
 
   async editProfile(
-    userId: number,
+    id: number,
     { email, password }: EditProfileInput,
   ): Promise<User> {
-    const user = await this.users.findOne({ where: { id: userId } });
+    const user = await this.users.findOne({ where: { id } });
     if (email) {
       user.email = email;
     }
@@ -86,5 +86,23 @@ export class UsersSerivce {
       user.password = password;
     }
     return this.users.save(user);
+  }
+
+  async deleteAccount(id: number): Promise<{ ok: boolean; error?: string }> {
+    try {
+      const user = await this.users.findOne({ where: { id } });
+      if (!user) {
+        throw Error();
+      }
+      await this.users.delete(id);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: "Coundn't delete the account",
+      };
+    }
   }
 }

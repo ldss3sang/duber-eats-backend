@@ -11,6 +11,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
+import { DeleteAccountOutput } from './dtos/delete-account.dto';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 @Resolver((of) => User)
@@ -87,7 +88,7 @@ export class UsersResolver {
     }
   }
 
-  @Mutation((_returns) => EditProfileOutput)
+  @Mutation((returns) => EditProfileOutput)
   @UseGuards(AuthGuard)
   async editProfile(
     @AuthUser() authUser: User,
@@ -97,6 +98,25 @@ export class UsersResolver {
       await this.usersService.editProfile(authUser.id, editProfileInput);
       return {
         ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  @Mutation((returns) => DeleteAccountOutput)
+  @UseGuards(AuthGuard)
+  async deleteAccount(
+    @AuthUser() authUser: User,
+  ): Promise<DeleteAccountOutput> {
+    try {
+      const { ok, error } = await this.usersService.deleteAccount(authUser.id);
+      return {
+        ok,
+        error,
       };
     } catch (error) {
       return {
