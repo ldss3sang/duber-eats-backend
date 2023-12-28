@@ -74,7 +74,7 @@ export class UsersSerivce {
         };
       }
 
-      const token = this.jwtService.sign({ id: user.id });
+      const token = this.jwtService.sign(user.id);
       return {
         ok: true,
         token,
@@ -82,17 +82,14 @@ export class UsersSerivce {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: "Can't log the user in",
       };
     }
   }
 
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.users.findOne({ where: { id } });
-      if (!user) {
-        throw Error();
-      }
+      const user = await this.users.findOneOrFail({ where: { id } });
       return {
         ok: true,
         user,
@@ -129,7 +126,6 @@ export class UsersSerivce {
         ok: true,
       };
     } catch (error) {
-      console.log(error);
       return {
         ok: false,
         error: 'Could not update profile.',
@@ -139,10 +135,7 @@ export class UsersSerivce {
 
   async deleteAccount(id: number): Promise<DeleteAccountOutput> {
     try {
-      const user = await this.users.findOne({ where: { id } });
-      if (!user) {
-        throw Error();
-      }
+      await this.users.findOneOrFail({ where: { id } });
       await this.users.delete(id);
       return {
         ok: true,
@@ -174,7 +167,7 @@ export class UsersSerivce {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: 'Could not verify the email',
       };
     }
   }
