@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import {
   CreateAccountInput,
@@ -110,8 +110,18 @@ export class UsersSerivce {
       const user = await this.users.findOne({ where: { id } });
 
       if (email) {
+        const exist = await this.users.exist({
+          where: { email, id: Not(id) },
+        });
+        if (exist) {
+          return {
+            ok: false,
+            error: 'The other user already has the same email',
+          };
+        }
         user.email = email;
         user.verified = false;
+        await this.verifications.delete({ user: { id: user.id } });
         const verification = await this.verifications.save(
           this.verifications.create({ user }),
         );
